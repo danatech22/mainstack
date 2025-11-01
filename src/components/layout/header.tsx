@@ -22,17 +22,24 @@ import { cn } from "@/lib/utils";
 import { NavLink } from "react-router";
 import { useUser } from "@/api/hooks";
 
+import homeIcon from "/src/assets/home.svg";
+import analyticsIcon from "/src/assets/analytics.svg";
+import paymentsIcon from "/src/assets/payments.svg";
+import usersIcon from "/src/assets/users.svg";
+import appsIcon from "/src/assets/apps.svg";
+import logoIcon from "/src/assets/mainstack-logo.svg";
+
 const navItems = [
-  { icon: "/src/assets/home.svg", label: "Home", href: "/" },
-  { icon: "/src/assets/analytics.svg", label: "Analytics", href: "/analytics" },
+  { icon: homeIcon, label: "Home", href: "/" },
+  { icon: analyticsIcon, label: "Analytics", href: "/analytics" },
   {
-    icon: "/src/assets/payments.svg",
+    icon: paymentsIcon,
     label: "Revenue",
     href: "/revenue",
     active: true,
   },
-  { icon: "/src/assets/users.svg", label: "CRM", href: "/crm" },
-  { icon: "/src/assets/apps.svg", label: "Apps", href: "/apps" },
+  { icon: usersIcon, label: "CRM", href: "/crm" },
+  { icon: appsIcon, label: "Apps", href: "/apps" },
 ];
 
 // Helper function to get initials
@@ -51,7 +58,7 @@ export function Header() {
       <nav className="w-full h-full flex items-center justify-between px-5">
         <NavLink to="/" className="shrink-0">
           <img
-            src="/src/assets/mainstack-logo.svg"
+            src={logoIcon}
             className="size-9 object-contain"
             alt="mainstack logo"
           />
