@@ -15,9 +15,11 @@ interface StatCardProps {
 
 export function StatCard({ label, amount, tooltip }: StatCardProps) {
   return (
-    <div className="flex flex-col gap-2.5">
-      <div className="flex items-center gap-2">
-        <span className="text-[13px] text-gray-500 font-medium">{label}</span>
+    <div className="flex flex-col gap-2.5 w-full">
+      <div className="flex items-center gap-2 justify-between">
+        <span className="text-sm text-[#56616B] tracking-tighter font-medium">
+          {label}
+        </span>
         {tooltip && (
           <TooltipProvider delayDuration={200}>
             <Tooltip>
@@ -33,7 +35,7 @@ export function StatCard({ label, amount, tooltip }: StatCardProps) {
           </TooltipProvider>
         )}
       </div>
-      <div className="text-[26px] font-bold leading-none tracking-tight">
+      <div className="text-3xl font-bold leading-none tracking-tighter text-[#131316]">
         {formatCurrency(amount)}
       </div>
     </div>

@@ -1,83 +1,121 @@
-import type { ChartDataPoint } from "@/types/revenue";
-import { useEffect, useRef } from "react";
+import { useMemo } from "react";
+import { Line, LineChart, XAxis } from "recharts";
+import { format, parseISO } from "date-fns";
+
+import {
+  ChartContainer,
+  ChartTooltip,
+  ChartTooltipContent,
+} from "@/components/ui/chart";
+import type { ChartConfig } from "@/components/ui/chart";
 
 interface BalanceChartProps {
-  data: ChartDataPoint[];
-  startDate: string;
-  endDate: string;
+  transactions?: Array<{
+    amount: number;
+    type: "deposit" | "withdrawal";
+    status: string;
+    date: string;
+  }>;
 }
 
-export function BalanceChart({ data, startDate, endDate }: BalanceChartProps) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
+const chartConfig = {
+  balance: {
+    label: "Balance",
+    color: "#FF5403",
+  },
+} satisfies ChartConfig;
 
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
+export function BalanceChart({ transactions = [] }: BalanceChartProps) {
+  const chartData = useMemo(() => {
+    if (!transactions.length) return [];
 
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
+    // Sort transactions by date
+    const sortedTransactions = [...transactions].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
 
-    const dpr = window.devicePixelRatio || 1;
-    const rect = canvas.getBoundingClientRect();
+    // Calculate running balance for each day
+    let runningBalance = 0;
+    const dailyBalances = new Map<string, number>();
 
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-
-    ctx.scale(dpr, dpr);
-
-    // Clear canvas
-    ctx.clearRect(0, 0, rect.width, rect.height);
-
-    // Get min and max values
-    const values = data.map((d) => d.value);
-    const minValue = Math.min(...values);
-    const maxValue = Math.max(...values);
-    const range = maxValue - minValue;
-
-    // Draw curve
-    ctx.beginPath();
-    ctx.strokeStyle = "#fb923c";
-    ctx.lineWidth = 2;
-    ctx.lineCap = "round";
-    ctx.lineJoin = "round";
-
-    data.forEach((point, index) => {
-      const x = (index / (data.length - 1)) * rect.width;
-      const normalizedValue = (point.value - minValue) / range;
-      const y =
-        rect.height - normalizedValue * rect.height * 0.8 - rect.height * 0.1;
-
-      if (index === 0) {
-        ctx.moveTo(x, y);
-      } else {
-        ctx.lineTo(x, y);
+    sortedTransactions.forEach((transaction) => {
+      if (transaction.status === "successful") {
+        if (transaction.type === "deposit") {
+          runningBalance += transaction.amount;
+        } else if (transaction.type === "withdrawal") {
+          runningBalance -= transaction.amount;
+        }
+        dailyBalances.set(transaction.date, runningBalance);
       }
     });
 
-    ctx.stroke();
-  }, [data]);
+    // Convert to array format for chart
+    return Array.from(dailyBalances.entries()).map(([date, balance]) => ({
+      date,
+      balance,
+      fullDate: format(parseISO(date), "MMM dd, yyyy"),
+    }));
+  }, [transactions]);
+
+  // Get tick positions (only first and last)
+  const customTicks = useMemo(() => {
+    if (chartData.length === 0) return [];
+    return [chartData[0].date, chartData[chartData.length - 1].date];
+  }, [chartData]);
+
+  if (chartData.length === 0) {
+    return (
+      <div className="relative w-full h-64 flex items-center justify-center text-muted-foreground">
+        No transaction data available
+      </div>
+    );
+  }
 
   return (
-    <div className="relative w-full h-64">
-      <canvas
-        ref={canvasRef}
-        className="w-full h-full"
-        style={{ width: "100%", height: "100%" }}
-      />
-      <div className="absolute bottom-0 left-0 text-xs text-gray-500">
-        {new Date(startDate).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })}
-      </div>
-      <div className="absolute bottom-0 right-0 text-xs text-gray-500">
-        {new Date(endDate).toLocaleDateString("en-US", {
-          month: "short",
-          day: "numeric",
-          year: "numeric",
-        })}
-      </div>
+    <div className="relative w-full">
+      <ChartContainer className="h-64 w-full" config={chartConfig}>
+        <LineChart
+          accessibilityLayer
+          data={chartData}
+          margin={{
+            left: 12,
+            right: 12,
+          }}
+        >
+          <XAxis
+            dataKey="date"
+            tickLine={false}
+            axisLine={true}
+            tickMargin={8}
+            ticks={customTicks}
+            tickFormatter={(value) => format(parseISO(value), "MMM")}
+          />
+          <ChartTooltip
+            cursor={false}
+            content={
+              <ChartTooltipContent
+                labelFormatter={(_, payload) => {
+                  if (payload && payload[0]) {
+                    return payload[0].payload.fullDate;
+                  }
+                  return "";
+                }}
+                formatter={(value) => [
+                  `$${Number(value).toFixed(2)}`,
+                  " Balance",
+                ]}
+              />
+            }
+          />
+          <Line
+            dataKey="balance"
+            type="natural"
+            stroke="var(--color-balance)"
+            strokeWidth={2}
+            dot={false}
+          />
+        </LineChart>
+      </ChartContainer>
     </div>
   );
 }

@@ -1,5 +1,14 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
+import {
+  parseISO,
+  isSameDay,
+  subDays,
+  startOfMonth,
+  subMonths,
+  startOfYear,
+  format,
+} from "date-fns";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -11,6 +20,7 @@ export function formatCurrency(amount: number): string {
     currency: "USD",
     minimumFractionDigits: 2,
     maximumFractionDigits: 2,
+    currencyDisplay: "code",
   }).format(amount);
 }
 
@@ -92,4 +102,58 @@ export function getTransactionSubtitle(transaction: any): string {
   }
 
   return transaction.metadata?.name || "Unknown";
+}
+
+export function getDateRangeDescriptor(
+  from: string | null | undefined,
+  to: string | null | undefined
+): string {
+  const today = new Date();
+
+  if (!from && !to) {
+    return "All Time";
+  }
+
+  if (from && to) {
+    const fromDate = parseISO(from);
+    const toDate = parseISO(to);
+
+    if (isSameDay(toDate, today)) {
+      if (isSameDay(fromDate, today)) {
+        return "Today";
+      }
+      if (isSameDay(fromDate, subDays(today, 7))) {
+        return "the last 7 days";
+      }
+      if (isSameDay(fromDate, startOfMonth(today))) {
+        return "This Month";
+      }
+      if (isSameDay(fromDate, subMonths(today, 3))) {
+        return "the last 3 months";
+      }
+      if (isSameDay(fromDate, startOfYear(today))) {
+        return "This Year";
+      }
+    }
+
+    if (isSameDay(fromDate, toDate)) {
+      if (isSameDay(fromDate, subDays(today, 1))) {
+        return "Yesterday";
+      }
+      return `on ${format(fromDate, "MMM d, yyyy")}`;
+    }
+
+    const fromFormatted = format(fromDate, "MMM d, yyyy");
+    const toFormatted = format(toDate, "MMM d, yyyy");
+    return `from ${fromFormatted} to ${toFormatted}`;
+  }
+
+  if (from && !to) {
+    return `since ${format(parseISO(from), "MMM d, yyyy")}`;
+  }
+  if (!from && to) {
+    return `up to ${format(parseISO(to), "MMM d, yyyy")}`;
+  }
+
+  return "All Time";
 }
