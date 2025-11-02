@@ -116,12 +116,6 @@ The balance chart displays:
 - Only includes successful transactions
 - Smooth line interpolation for better visualization
 
-### Responsive Design
-
-- Mobile-first approach
-- Adaptive layouts for tablets and desktops
-- Touch-friendly interactions
-- Optimized for all screen sizes
 
 ## Code Quality
 
@@ -132,14 +126,6 @@ The balance chart displays:
 - ✅ Custom hooks for reusable logic
 - ✅ Proper error handling
 
-## Performance Optimizations
-
-- Code splitting with dynamic imports
-- React Query for efficient data caching
-- Memoization of expensive calculations
-- Optimized bundle size with tree shaking
-- Lazy loading of components
-
 ## Browser Support
 
 - Chrome (latest)
@@ -147,21 +133,8 @@ The balance chart displays:
 - Safari (latest)
 - Edge (latest)
 
-## Contributing
-
-This is a assessment project. For production use, consider:
-
-1. Adding E2E tests with Playwright/Cypress
-2. Implementing error boundaries
-3. Adding analytics tracking
-4. Setting up CI/CD pipeline
-5. Adding monitoring and logging
-6. Implementing progressive web app (PWA) features
 
 ## License
 
 This project is created for assessment purposes.
 
-## Contact
-
-For questions or feedback, please reach out to the project maintainer.

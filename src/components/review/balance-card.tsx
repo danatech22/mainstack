@@ -16,7 +16,6 @@ export function BalanceCard() {
   return (
     <div className="bg-white max-w-290 mx-auto mb-28 flex justify-between">
       <div className="w-8/12">
-        {/* Top Section */}
         <div className="flex items-start gap-20 mb-8">
           <div>
             <p className="text-sm mb-2 text-[#56616B] tracking-tighter font-medium">
